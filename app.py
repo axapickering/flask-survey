@@ -14,7 +14,7 @@ responses = []
 def home_page():
     """ Display home page"""
 
-    global responses = []
+    responses.clear()
 
     return render_template("survey_start.html", survey=survey)
 
@@ -30,17 +30,19 @@ def begin():
 def display_question(question_number):
     """Display current question"""
 
-    return render_template("/question.html", question=survey.questions[question_number], question_number=question_number)
+    return render_template("/question.html", question=survey.questions[question_number], responses=responses)
+    #TODO: only need to pass in list, can use this to determine next q
 
 
-@app.post("/answer/<int:question_number>")
-def answer_to_question(question_number):
+@app.post("/answer")
+def answer_to_question():
     """Get and store question answer, redirect to next question or completion page"""
 
+    next_question = len(responses)
     responses.append(request.form['answer'])
-    if question_number == (len(survey.questions)-1):
+    if next_question == (len(survey.questions)):
         return redirect("/thanks")
-    next_question = question_number + 1
+
 
     return redirect(f'/questions/{next_question}')
 
@@ -49,6 +51,6 @@ def answer_to_question(question_number):
 def thank_you():
     """Display thank you page with all questions/answers"""
 
-    length = range(len(responses))
+    length = range(len(responses)-1)
 
     return render_template("completion.html", questions=survey.questions, responses=responses, length=length)
