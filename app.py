@@ -8,13 +8,12 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-responses = []
 
 @app.get("/")
 def home_page():
     """ Display home page"""
 
-    responses.clear()
+    session["responses"] = []
 
     return render_template("survey_start.html", survey=survey)
 
@@ -30,19 +29,30 @@ def begin():
 def display_question(question_number):
     """Display current question"""
 
-    return render_template("/question.html", question=survey.questions[question_number], responses=responses)
-    #TODO: only need to pass in list, can use this to determine next q
+    response_num = len(session['responses'])
+
+    if response_num == len(survey.questions):
+        flash("Once wasn't enough?")
+        return redirect("/thanks")
+    elif response_num != question_number:
+        flash("Hey dummy, stick to the question you're on.")
+        return redirect(f'/questions/{response_num}')
+
+    return render_template("/question.html", question=survey.questions[question_number])
 
 
 @app.post("/answer")
 def answer_to_question():
     """Get and store question answer, redirect to next question or completion page"""
 
-    next_question = len(responses)
+    responses = session["responses"]
     responses.append(request.form['answer'])
+    session["responses"] = responses
+
+    next_question = len(session["responses"])
+
     if next_question == (len(survey.questions)):
         return redirect("/thanks")
-
 
     return redirect(f'/questions/{next_question}')
 
@@ -51,6 +61,6 @@ def answer_to_question():
 def thank_you():
     """Display thank you page with all questions/answers"""
 
-    length = range(len(responses)-1)
+    length_list = range(len(session['responses']))
 
-    return render_template("completion.html", questions=survey.questions, responses=responses, length=length)
+    return render_template("completion.html", questions=survey.questions,length_list=length_list)
