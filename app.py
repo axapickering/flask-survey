@@ -8,12 +8,11 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
+# TODO: create a global var for session key
 
 @app.get("/")
 def home_page():
     """ Display home page"""
-
-    session["responses"] = []
 
     return render_template("survey_start.html", survey=survey)
 
@@ -21,7 +20,8 @@ def home_page():
 @app.post("/begin")
 def begin():
     """ Redirect to first survey question"""
-
+    
+    session["responses"] = []
     return redirect("/questions/0")
 
 
@@ -61,6 +61,6 @@ def answer_to_question():
 def thank_you():
     """Display thank you page with all questions/answers"""
 
-    length_list = range(len(session['responses']))
+    length_list = range(len(session['responses'])) # research loop.index
 
     return render_template("completion.html", questions=survey.questions,length_list=length_list)
