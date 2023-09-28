@@ -1,16 +1,21 @@
 {% extends 'base.html' %}
+
+{% block title %}
+<title>Question #{{question_number}}</title>
+{% endblock %}
+
 {% block content %}
 
 {% for msg in get_flashed_messages() %}
 <p>{{ msg }}</p>
 {% endfor %}
 
-<h1>{{ question.prompt }}</h1>
+<h1>{{ session["survey"].questions[question_number].prompt }}</h1>
 
 <form action="/answer" method="POST">
 
   <!-- you should have one item like this for every choice -->
-  {% for choice in question.choices %}
+  {% for choice in session["survey"].questions[question_number].choices %}
     <p>
       <input type="radio" name="answer" value="{{ choice }}">
       {{ choice }}

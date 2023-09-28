@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, flash, session
 from flask_debugtoolbar import DebugToolbarExtension
 from surveys import satisfaction_survey as survey
+from surveys import surveys as surveys
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = "never-tell!"
@@ -8,19 +9,20 @@ app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 
 debug = DebugToolbarExtension(app)
 
-# TODO: create a global var for session key
 
 @app.get("/")
 def home_page():
     """ Display home page"""
 
-    return render_template("survey_start.html", survey=survey)
+    session["responses"] = []
+
+    return render_template("survey_start.html")
 
 
 @app.post("/begin")
 def begin():
     """ Redirect to first survey question"""
-    
+
     session["responses"] = []
     return redirect("/questions/0")
 
@@ -31,14 +33,14 @@ def display_question(question_number):
 
     response_num = len(session['responses'])
 
-    if response_num == len(survey.questions):
+    if response_num == len(session["survey"].questions):
         flash("Once wasn't enough?")
         return redirect("/thanks")
     elif response_num != question_number:
         flash("Hey dummy, stick to the question you're on.")
         return redirect(f'/questions/{response_num}')
 
-    return render_template("/question.html", question=survey.questions[question_number])
+    return render_template("/question.html", question_number=question_number) # question=session["survey"].questions[question_number]
 
 
 @app.post("/answer")
@@ -51,7 +53,7 @@ def answer_to_question():
 
     next_question = len(session["responses"])
 
-    if next_question == (len(survey.questions)):
+    if next_question == (len(session["survey"].questions)):
         return redirect("/thanks")
 
     return redirect(f'/questions/{next_question}')
@@ -63,4 +65,4 @@ def thank_you():
 
     length_list = range(len(session['responses'])) # research loop.index
 
-    return render_template("completion.html", questions=survey.questions,length_list=length_list)
+    return render_template("completion.html", questions=session["survey"].questions,length_list=length_list)

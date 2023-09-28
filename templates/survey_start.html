@@ -1,9 +1,14 @@
 {% extends 'base.html' %}
+
+{% block title %}
+<title>Survey Start</title>
+{% endblock %}
+
 {% block content %}
 
-  <h1>{{ survey.title }}</h1>
+  <h1>{{ session["survey"].title }}</h1>
   <p>
-    {{ survey.instructions }}
+    {{ session["survey"].instructions }}
   </p>
 
   <!--
